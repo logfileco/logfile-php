@@ -1,0 +1,29 @@
+{
+    "name": "logfile/logfile-php",
+    "require": {
+        "php": ">=7.1",
+        "ext-curl": "*"
+    },
+    "require-dev": {
+        "phpspec/phpspec": "~5",
+        "friendsofphp/php-cs-fixer": "~2",
+        "phpstan/phpstan": "~0",
+        "symfony/var-dumper": "~4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Logfile\\": "src/"
+        }
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "scripts": {
+        "test": [
+            "./bin/phpspec run"
+        ],
+        "psr": [
+            "./bin/php-cs-fixer fix ./src --rules=@PSR2,no_unused_imports"
+        ]
+    }
+}

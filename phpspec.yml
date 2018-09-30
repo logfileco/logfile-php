@@ -1,0 +1,8 @@
+formatter.name: pretty
+stop_on_failure: true
+code_generation: false
+suites:
+    default:
+        namespace: Logfile\Stacktrace
+        psr4_prefix: Logfile\Stacktrace
+        src_path: ./src
