@@ -4,23 +4,11 @@ namespace Logfile;
 
 trait DataTrait
 {
-    protected $id;
+    protected $tags = [];
 
-    protected $tags;
+    protected $user = [];
 
-    protected $user;
-
-    protected $release;
-
-    public function setId(string $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
+    protected $release = '';
 
     public function hasTags(): bool
     {
@@ -37,7 +25,7 @@ trait DataTrait
         $this->tags = $tags;
     }
 
-    public function addTag(string $key, string $value): void
+    public function addTag(string $key, $value): void
     {
         $this->tags[$key] = $value;
     }
