@@ -4,21 +4,35 @@ namespace Logfile;
 
 class Sender
 {
-    public function send(Payload $payload, $accessToken)
+    public function send(Payload $payload, string $token): bool
     {
         $handle = curl_init();
-        $this->setCurlOptions($handle, $payload, $accessToken);
+
+        if (!is_resource($handle)) {
+            throw new \ErrorException('Failed to start curl session');
+        }
+
+        $this->setCurlOptions($handle, $payload, $token);
+
         $result = curl_exec($handle);
-        $statusCode = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        
-        $result = $result === false ?
-                    curl_error($handle) :
-                    json_decode($result, true);
-        
+        $info = curl_getinfo($handle);
+        $error = curl_error($handle);
+
         curl_close($handle);
-        $data = $payload->data();
-        $uuid = $data['data']['uuid'];
-        
-        return new Response($statusCode, $result, $uuid);
+
+        return $result !== false;
+    }
+
+    protected function setCurlOptions($handle, Payload $payload, string $token): void
+    {
+        curl_setopt_array($handle, [
+            CURLOPT_URL => sprintf('https://logfile.co/api/push/%s', $token),
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload->getEncodedData(),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+        ]);
     }
 }

@@ -2,11 +2,48 @@
 
 namespace Logfile;
 
+use Throwable;
+
 class Logfile
 {
+    use DataTrait;
 
-    // from http://www.php.net/manual/en/function.uniqid.php#94959
-    public static function uuid4()
+    protected $token;
+
+    protected $sender;
+
+    public function __construct(string $token)
+    {
+        $this->token = $token;
+        $this->sender = new Sender();
+    }
+
+    protected function getToken(): string
+    {
+        return $this->token;
+    }
+
+    /**
+     * Capture exception and return the event ID
+     *
+     * @param Throwable $exception
+     * @return string
+     */
+    public function captureException(Throwable $exception): string
+    {
+        $this->setId(static::uuid4());
+        $payload = new Payload($exception, $this->getId(), $this->getTags(), $this->getRelease(), $this->getUser());
+        $this->sender->send($payload, $this->getToken());
+        return $this->getId();
+    }
+
+    /**
+     * Get uuid v4
+     *
+     * @see http://www.php.net/manual/en/function.uniqid.php#94959
+     * @return string
+     */
+    public static function uuid4(): string
     {
         mt_srand();
         return sprintf(

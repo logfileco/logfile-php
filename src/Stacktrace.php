@@ -13,12 +13,20 @@ class Stacktrace
         $this->exception = $exception;
     }
 
-    protected function getTrace(): array
+    public function getTrace(): array
     {
-        if ($this->exception) {
-            return $this->exception->getTrace();
+        $frames = $this->exception->getTrace();
+
+        if (empty($frames)) {
+            $frames = [
+                [
+                    'file' => $this->exception->getFile(),
+                    'line' => $this->exception->getLine(),
+                ]
+            ];
         }
-        return \debug_backtrace();
+
+        return $frames;
     }
 
     public function getFrames(): array
@@ -26,7 +34,7 @@ class Stacktrace
         $frames = [];
 
         foreach ($this->getTrace() as $frame) {
-            $frames[] = Frame::create($frame);
+            $frames[] = Frame::create($frame)->toArray();
         }
 
         return $frames;

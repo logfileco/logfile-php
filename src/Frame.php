@@ -29,11 +29,13 @@ class Frame
         } elseif (isset($params['function'])) {
             $frame->setCaller(\sprintf('%s(anonymous)', $params['function']));
         } else {
-            $frame->setCaller('(anonymous)');
+            $frame->setCaller('{main}');
         }
 
         if (isset($params['args'])) {
             $frame->setArguments($params['args']);
+        } else {
+            $frame->setArguments([]);
         }
 
         return $frame;
@@ -89,8 +91,32 @@ class Frame
         $this->args = [];
 
         foreach (\array_values($args) as $index => $arg) {
-            $this->args['param'.($index + 1)] = $arg;
+            $this->args['param'.($index + 1)] = $this->normalise($arg);
         }
+    }
+
+    protected function normalise($value): string
+    {
+        if ($value === null) {
+            return 'null';
+        } elseif ($value === false) {
+            return 'false';
+        } elseif ($value === true) {
+            return 'true';
+        } elseif (is_float($value) && (int) $value == $value) {
+            return $value.'.0';
+        } elseif (is_integer($value) || is_float($value)) {
+            return (string) $value;
+        } elseif (is_object($value) || gettype($value) == 'object') {
+            return 'Object '.get_class($value);
+        } elseif (is_resource($value)) {
+            return 'Resource '.get_resource_type($value);
+        } elseif (is_array($value)) {
+            return 'Array of length ' . count($value);
+        }
+
+        $truncation = new Truncation($value);
+        return $truncation->truncate();
     }
 
     public function hasContext(): bool
@@ -101,5 +127,27 @@ class Frame
     public function getContext(): Context
     {
         return new Context($this->getFile(), $this->getLine());
+    }
+
+    public function toArray(): array
+    {
+        $frame = [];
+
+        if ($this->hasFile()) {
+            $frame['file'] = $this->getFile();
+        }
+
+        if ($this->hasLine()) {
+            $frame['line'] = $this->getLine();
+        }
+
+        $frame['caller'] = $this->getCaller();
+        $frame['args'] = $this->getArguments();
+
+        if ($this->hasContext()) {
+            $frame['context'] = $this->getContext()->getPlaceInFile();
+        }
+
+        return $frame;
     }
 }

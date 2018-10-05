@@ -4,9 +4,26 @@ namespace Logfile;
 
 class Truncation
 {
-	protected function traverse(&$data, $threshold, $payload)
-	{}
+    protected $payload;
 
-	public function needsTruncating()
-	{}
+    protected $threshold;
+
+    public function __construct(string $payload, int $threshold = 1024)
+    {
+        $this->payload = $payload;
+        $this->threshold = $threshold;
+    }
+
+    public function truncate(): string
+    {
+        $size = mb_strlen($this->payload);
+
+        if ($size > $this->threshold) {
+            $newPayload = substr($this->payload, 0, $this->threshold);
+            $truncated = $size - $this->threshold;
+            return sprintf('%s .. (truncated %d)', $newPayload, $truncated);
+        }
+
+        return $this->payload;
+    }
 }
