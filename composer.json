@@ -1,5 +1,5 @@
 {
-    "name": "logfile/logfile-php",
+    "name": "logfileco/logfile-php",
     "require": {
         "php": ">=7.1",
         "ext-curl": "*"
