@@ -43,7 +43,7 @@ class Frame
 
     public function getRelativeFilepath(): string
     {
-        if($this->hasPath() && \strpos($this->getFile(), $this->getPath()) === 0) {
+        if ($this->hasPath() && \strpos($this->getFile(), $this->getPath()) === 0) {
             return substr($this->getFile(), \mb_strlen($this->getPath()));
         }
         return $this->getFile();

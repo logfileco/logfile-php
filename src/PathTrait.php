@@ -20,11 +20,10 @@ trait PathTrait
     {
         $realpath = realpath($path);
 
-        if(false === $realpath) {
+        if (false === $realpath) {
             throw new \InvalidArgumentException('Path does not exist.');
         }
 
         $this->path = $realpath . '/';
     }
 }
-
