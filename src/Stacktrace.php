@@ -6,6 +6,8 @@ use Throwable;
 
 class Stacktrace
 {
+    use PathTrait;
+
     protected $exception;
 
     public function __construct(Throwable $exception = null)
@@ -17,13 +19,11 @@ class Stacktrace
     {
         $frames = $this->exception->getTrace();
 
-        if (empty($frames)) {
-            $frames = [
-                [
-                    'file' => $this->exception->getFile(),
-                    'line' => $this->exception->getLine(),
-                ]
-            ];
+        if (!isset($frames[0]['file']) || $frames[0]['file'] !== $this->exception->getFile()) {
+            array_unshift($frames, [
+                'file' => $this->exception->getFile(),
+                'line' => $this->exception->getLine(),
+            ]);
         }
 
         return $frames;
@@ -33,8 +33,10 @@ class Stacktrace
     {
         $frames = [];
 
-        foreach ($this->getTrace() as $frame) {
-            $frames[] = Frame::create($frame)->toArray();
+        foreach ($this->getTrace() as $params) {
+            $frame = Frame::create($params);
+            $frame->setPath($this->getPath());
+            $frames[] = $frame->toArray();
         }
 
         return $frames;

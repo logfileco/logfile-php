@@ -4,6 +4,8 @@ namespace Logfile;
 
 class Frame
 {
+    use PathTrait;
+
     protected $file;
 
     protected $line;
@@ -27,9 +29,7 @@ class Frame
         if (isset($params['class'])) {
             $frame->setCaller(\sprintf('%s%s%s', $params['class'], $params['type'], $params['function']));
         } elseif (isset($params['function'])) {
-            $frame->setCaller(\sprintf('%s(anonymous)', $params['function']));
-        } else {
-            $frame->setCaller('{main}');
+            $frame->setCaller($params['function']);
         }
 
         if (isset($params['args'])) {
@@ -39,6 +39,14 @@ class Frame
         }
 
         return $frame;
+    }
+
+    public function getRelativeFilepath(): string
+    {
+        if($this->hasPath() && \strpos($this->getFile(), $this->getPath()) === 0) {
+            return substr($this->getFile(), \mb_strlen($this->getPath()));
+        }
+        return $this->getFile();
     }
 
     public function getFile(): string
@@ -69,6 +77,11 @@ class Frame
     public function hasLine(): bool
     {
         return $this->line !== null;
+    }
+
+    public function hasCaller(): bool
+    {
+        return !empty($this->caller);
     }
 
     public function getCaller(): string
@@ -134,14 +147,17 @@ class Frame
         $frame = [];
 
         if ($this->hasFile()) {
-            $frame['file'] = $this->getFile();
+            $frame['file'] = $this->getRelativeFilepath();
         }
 
         if ($this->hasLine()) {
             $frame['line'] = $this->getLine();
         }
 
-        $frame['caller'] = $this->getCaller();
+        if ($this->hasCaller()) {
+            $frame['caller'] = $this->getCaller();
+        }
+
         $frame['args'] = $this->getArguments();
 
         if ($this->hasContext()) {

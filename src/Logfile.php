@@ -4,9 +4,9 @@ namespace Logfile;
 
 use Throwable;
 
-class Logfile
+class Logfile implements DataInterface
 {
-    use DataTrait;
+    use DataTrait, PathTrait;
 
     protected $token;
 
@@ -31,10 +31,8 @@ class Logfile
      */
     public function captureException(Throwable $exception): string
     {
-        $payload = Payload::createFromException($exception);
-        $payload->setTags($this->getTags());
-        $payload->setUser($this->getUser());
-        $payload->setRelease($this->getRelease());
+        $payload = Payload::createFromException($exception, $this->getPath());
+        $payload->copy($this);
         return $this->log($payload);
     }
 

@@ -4,7 +4,7 @@ namespace Logfile;
 
 use Throwable;
 
-class Payload
+class Payload implements DataInterface
 {
     use DataTrait;
 
@@ -35,13 +35,19 @@ class Payload
         return $this->context;
     }
 
-    public static function createFromException(Throwable $exception): self
+    public static function createFromException(Throwable $exception, string $path = ''): self
     {
         $payload = new Payload($exception->getMessage(), static::uuid4());
         $trace = new Stacktrace($exception);
+        $trace->setPath($path);
         $context = $trace->getFrames();
         $payload->setContext($context);
         return $payload;
+    }
+
+    public function setId(string $id): void
+    {
+        $this->id = $id;
     }
 
     public function getId(): string

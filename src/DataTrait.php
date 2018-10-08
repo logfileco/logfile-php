@@ -10,6 +10,13 @@ trait DataTrait
 
     protected $release = '';
 
+    public function copy(DataInterface $src): void
+    {
+        $this->setTags($src->getTags());
+        $this->setUser($src->getUser());
+        $this->setRelease($src->getRelease());
+    }
+
     public function hasTags(): bool
     {
         return !empty($this->tags);
