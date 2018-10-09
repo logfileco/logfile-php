@@ -10,22 +10,20 @@ $logfile->setTags([
 ]);
 $logfile->setRelease(exec('git log --pretty="%H" -n1 HEAD'));
 
-set_exception_handler(function (Throwable $e) use($logfile) {
-    $logfile->captureException($e);
-});
-
 $handler = new Logfile\MonologHandler($logfile);
 
 $logger = new Monolog\Logger('debug');
 $logger->pushHandler($handler);
-$logger->pushProcessor(function ($record) {
-    $record['extra']['somemore'] = 'info';
-    return $record;
+
+// --------
+
+set_exception_handler(function (Throwable $e) use($logfile, $logger) {
+    $logfile->captureException($e);
+    $logger->error($e->getMessage(), ['exception' => $e]);
 });
 
-function fail($logger) {
-    $logger->error('whoops', ['foo' => 'bar']);
+function fail() {
     throw new ErrorException('whoops');
 }
 
-fail($logger);
+fail();
