@@ -4,9 +4,16 @@ namespace Logfile;
 
 class Sender
 {
+    protected $timeout;
+
+    public function __construct(int $timeout = 2)
+    {
+        $this->timeout = $timeout;
+    }
+
     public function send(Payload $payload, string $token): bool
     {
-        $handle = curl_init();
+        $handle = \curl_init();
 
         if (!is_resource($handle)) {
             throw new \ErrorException('Failed to start curl session');
@@ -14,25 +21,24 @@ class Sender
 
         $this->setCurlOptions($handle, $payload, $token);
 
-        $result = curl_exec($handle);
-        $info = curl_getinfo($handle);
-        $error = curl_error($handle);
+        $result = \curl_exec($handle);
 
-        curl_close($handle);
+        \curl_close($handle);
 
         return $result !== false;
     }
 
     protected function setCurlOptions($handle, Payload $payload, string $token): void
     {
-        curl_setopt_array($handle, [
-            CURLOPT_URL => sprintf('https://logfile.co/api/push/%s', $token),
+        \curl_setopt_array($handle, [
+            CURLOPT_URL => \sprintf('https://logfile.co/api/push/%s', $token),
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $payload->getEncodedData(),
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
             ],
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => $this->timeout,
         ]);
     }
 }
