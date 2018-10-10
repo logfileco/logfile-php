@@ -16,12 +16,12 @@ class Truncation
 
     public function truncate(): string
     {
-        $size = mb_strlen($this->payload);
+        $size = \mb_strlen($this->payload);
 
         if ($size > $this->threshold) {
-            $newPayload = substr($this->payload, 0, $this->threshold);
+            $newPayload = \mb_substr($this->payload, 0, $this->threshold);
             $truncated = $size - $this->threshold;
-            return sprintf('%s .. (truncated %d)', $newPayload, $truncated);
+            return \sprintf('%s .. (truncated %d)', $newPayload, $truncated);
         }
 
         return $this->payload;
