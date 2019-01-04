@@ -2,6 +2,7 @@
 
 namespace Logfile;
 
+use LimitIterator;
 use SplFileObject;
 
 class Context
@@ -20,23 +21,19 @@ class Context
     {
         $context = [];
 
+        $min = $this->line - $lines;
+
+        if ($min < 0) {
+            $min = 0;
+        }
+
         $file = new SplFileObject($this->file, 'rb');
+        $iterator = new LimitIterator($file, $min, $lines + 1);
+        $index = $min;
 
-        $offset = \max(0, ($this->line - ($lines + 1)));
-        $file->seek((int) $offset);
-
-        $line = $offset + 1;
-
-        while (!$file->eof()) {
-            $context[$line] = $file->current();
-
-            if ($line > ($this->line + ($lines - 1))) {
-                break;
-            }
-
-            $file->next();
-
-            $line++;
+        foreach ($iterator as $text) {
+            $context[$index] = $text;
+            $index++;
         }
 
         return $context;

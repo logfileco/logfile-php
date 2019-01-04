@@ -108,6 +108,33 @@ class Frame
         }
     }
 
+    protected function normaliseArray($value): string
+    {
+        $count = count($value);
+
+        if ($count > 100) {
+            return 'Array of length ' . $count;
+        }
+
+        $types = [];
+
+        foreach ($value as $item) {
+            $type = gettype($item);
+            if ('object' === $type) {
+                $type = get_class($item);
+            }
+            if (!in_array($type, $types)) {
+                $types[] = $type;
+            }
+        }
+
+        if (count($types) > 3) {
+            return 'Mixed Array of length ' . $count;
+        }
+
+        return 'Array<'.implode('|', $types).'> of length ' . $count;
+    }
+
     protected function normalise($value): string
     {
         if ($value === null) {
@@ -125,7 +152,7 @@ class Frame
         } elseif (is_resource($value)) {
             return 'Resource '.get_resource_type($value);
         } elseif (is_array($value)) {
-            return 'Array of length ' . count($value);
+            return $this->normaliseArray($value);
         }
 
         $truncation = new Truncation($value);
