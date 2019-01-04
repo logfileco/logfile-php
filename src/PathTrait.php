@@ -21,7 +21,7 @@ trait PathTrait
         $realpath = realpath($path);
 
         if (false === $realpath) {
-            throw new \InvalidArgumentException('Path does not exist.');
+            throw new \InvalidArgumentException('Path does not exist: '.$path);
         }
 
         $this->path = $realpath . '/';

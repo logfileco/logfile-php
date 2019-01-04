@@ -12,7 +12,7 @@ class Frame
 
     protected $caller;
 
-    protected $args;
+    protected $args = [];
 
     public static function create(array $params): self
     {
@@ -44,7 +44,7 @@ class Frame
     public function getRelativeFilepath(): string
     {
         if ($this->hasPath() && \strpos($this->getFile(), $this->getPath()) === 0) {
-            return substr($this->getFile(), \mb_strlen($this->getPath()));
+            return \mb_substr($this->getFile(), \mb_strlen($this->getPath()));
         }
         return $this->getFile();
     }
@@ -96,7 +96,7 @@ class Frame
 
     public function getArguments(): array
     {
-        return $this->args;
+        return $this->args ?: [];
     }
 
     public function setArguments(array $args): void

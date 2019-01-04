@@ -17,19 +17,20 @@ class Context
         $this->line = $line;
     }
 
-    public function getPlaceInFile(int $lines = 4): array
+    public function getPlaceInFile(int $linesBefore = 4, int $linesAfter = 4): array
     {
         $context = [];
 
-        $min = $this->line - $lines;
+        $offset = $this->line - $linesBefore - 1;
 
-        if ($min < 0) {
-            $min = 0;
+        if ($offset < 0) {
+            $linesBefore = 0;
+            $offset = 0;
         }
 
         $file = new SplFileObject($this->file, 'rb');
-        $iterator = new LimitIterator($file, $min, $lines + 1);
-        $index = $min;
+        $iterator = new LimitIterator($file, $offset, $linesBefore + $linesAfter + 1);
+        $index = $offset + 1;
 
         foreach ($iterator as $text) {
             $context[$index] = $text;

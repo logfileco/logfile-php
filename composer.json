@@ -9,7 +9,8 @@
         "phpspec/phpspec": "~5",
         "friendsofphp/php-cs-fixer": "~2",
         "phpstan/phpstan": "~0",
-        "symfony/var-dumper": "~4"
+        "symfony/var-dumper": "~4",
+        "phpunit/phpunit": "~7"
     },
     "autoload": {
         "psr-4": {
@@ -20,9 +21,6 @@
         "bin-dir": "bin"
     },
     "scripts": {
-        "test": [
-            "./bin/phpspec run"
-        ],
         "psr": [
             "./bin/php-cs-fixer fix ./src --rules=@PSR2,no_unused_imports"
         ]
