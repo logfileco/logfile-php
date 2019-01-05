@@ -12,6 +12,9 @@ class ContextTest extends TestCase
     {
         $this->file = __DIR__.'/../tmp/context.txt';
         $handle = fopen($this->file, 'w+');
+        if (false === $handle) {
+            throw new \ErrorException('Failed to open file: '.$this->file);
+        }
         foreach (range(1, 40) as $line) {
             fwrite($handle, 'Line '.$line."\n");
         }
