@@ -10,7 +10,7 @@ class ContextTest extends TestCase
 
     public function setup()
     {
-        $this->file = __DIR__.'/../tmp/context.txt';
+        $this->file = tempnam(sys_get_temp_dir(), 'PHPUnitContext');
         $handle = fopen($this->file, 'w+');
         if (false === $handle) {
             throw new \ErrorException('Failed to open file: '.$this->file);
