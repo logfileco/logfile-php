@@ -8,13 +8,22 @@ class Stacktrace
 {
     use PathTrait;
 
+    /**
+     * @var Throwable
+     */
     protected $exception;
 
-    public function __construct(Throwable $exception = null)
+    /**
+     * @param Throwable
+     */
+    public function __construct(Throwable $exception)
     {
         $this->exception = $exception;
     }
 
+    /**
+     * @return array
+     */
     public function getTrace(): array
     {
         $frames = $this->exception->getTrace();
@@ -29,6 +38,9 @@ class Stacktrace
         return $frames;
     }
 
+    /**
+     * @return array
+     */
     public function getFrames(): array
     {
         $frames = [];
