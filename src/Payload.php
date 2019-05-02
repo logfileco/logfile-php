@@ -98,7 +98,16 @@ class Payload implements DataInterface
     public function getEncodedData(): string
     {
         $data = $this->getData();
-        $encoded = json_encode($data);
+        $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        if (JSON_ERROR_UTF8 === json_last_error()) {
+            if (is_string($data)) {
+                $this->detectAndCleanUtf8($data);
+            } elseif (is_array($data)) {
+                array_walk_recursive($data, array($this, 'detectAndCleanUtf8'));
+            }
+            $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
 
         if (JSON_ERROR_NONE !== json_last_error()) {
             $error = json_last_error_msg();
@@ -106,6 +115,26 @@ class Payload implements DataInterface
         }
 
         return $encoded;
+    }
+
+    /**
+     * Detect invalid UTF-8 string characters and convert to valid UTF-8.
+     * @see https://github.com/Seldaek/monolog/blob/master/src/Monolog/Formatter/NormalizerFormatter.php
+     */
+    public function detectAndCleanUtf8(&$data)
+    {
+        if (is_string($data) && !preg_match('//u', $data)) {
+            $data = preg_replace_callback(
+                '/[\x80-\xFF]+/',
+                function ($m) { return utf8_encode($m[0]); },
+                $data
+            );
+            $data = str_replace(
+                array('¤', '¦', '¨', '´', '¸', '¼', '½', '¾'),
+                array('€', 'Š', 'š', 'Ž', 'ž', 'Œ', 'œ', 'Ÿ'),
+                $data
+            );
+        }
     }
 
     /**
