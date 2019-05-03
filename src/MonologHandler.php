@@ -5,7 +5,6 @@ namespace Logfile;
 use Monolog\Logger;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Formatter\FormatterInterface;
-use Monolog\Formatter\NormalizerFormatter;
 
 class MonologHandler extends AbstractProcessingHandler
 {
