@@ -2,19 +2,35 @@
 
 namespace Logfile;
 
-trait DataTrait
+class Config
 {
+    protected $path = '';
+
     protected $tags = [];
 
     protected $user = [];
 
     protected $release = '';
 
-    public function copy(DataInterface $src): void
+    public function hasPath(): bool
     {
-        $this->setTags($src->getTags());
-        $this->setUser($src->getUser());
-        $this->setRelease($src->getRelease());
+        return !empty($this->path);
+    }
+
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+
+    public function setPath(string $path): void
+    {
+        $realpath = realpath($path);
+
+        if (false === $realpath) {
+            throw new \InvalidArgumentException('Path does not exist: '.$path);
+        }
+
+        $this->path = $realpath . '/';
     }
 
     public function hasTags(): bool

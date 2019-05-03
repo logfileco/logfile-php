@@ -4,20 +4,26 @@ namespace Logfile;
 
 use Throwable;
 
-class Payload implements DataInterface
+class Payload
 {
-    use DataTrait;
-
     protected $message;
+
+    protected $config;
 
     protected $id;
 
     protected $context;
 
-    public function __construct(string $message, string $id)
+    public function __construct(string $message, Config $config)
     {
         $this->message = $message;
-        $this->id = $id;
+        $this->config = $config;
+        $this->id = $this->uuid4();
+    }
+
+    public function getMessage(): string
+    {
+        return $this->message;
     }
 
     public function setContext(array $context): void
@@ -35,11 +41,11 @@ class Payload implements DataInterface
         return $this->context;
     }
 
-    public static function createFromException(Throwable $exception, string $path = ''): self
+    public static function createFromException(Throwable $exception, Config $config): self
     {
-        $payload = new Payload($exception->getMessage(), static::uuid4());
+        $payload = new Payload($exception->getMessage(), $config);
         $trace = new Stacktrace($exception);
-        $trace->setPath($path);
+        $trace->setPath($config->getPath());
         $context = $trace->getFrames();
         $payload->setContext($context);
         return $payload;
@@ -66,20 +72,20 @@ class Payload implements DataInterface
             'id' => $this->getId(),
         ];
 
-        if ($this->hasTags()) {
-            $extra['tags'] = $this->getTags();
+        if ($this->config->hasTags()) {
+            $extra['tags'] = $this->config->getTags();
         }
 
-        if ($this->hasUser()) {
-            $extra['user'] = $this->getUser();
+        if ($this->config->hasUser()) {
+            $extra['user'] = $this->config->getUser();
         }
 
-        if ($this->hasRelease()) {
-            $extra['release'] = $this->getRelease();
+        if ($this->config->hasRelease()) {
+            $extra['release'] = $this->config->getRelease();
         }
 
         $data = [
-            'message' => $this->message,
+            'message' => $this->getMessage(),
             'extra' => $extra,
         ];
 
@@ -126,7 +132,9 @@ class Payload implements DataInterface
         if (is_string($data) && !preg_match('//u', $data)) {
             $data = preg_replace_callback(
                 '/[\x80-\xFF]+/',
-                function ($m) { return utf8_encode($m[0]); },
+                function ($m) {
+                    return utf8_encode($m[0]);
+                },
                 $data
             );
             $data = str_replace(
@@ -143,7 +151,7 @@ class Payload implements DataInterface
      * @see http://www.php.net/manual/en/function.uniqid.php#94959
      * @return string
      */
-    public static function uuid4(): string
+    protected function uuid4(): string
     {
         mt_srand();
         return sprintf(

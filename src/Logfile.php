@@ -4,18 +4,29 @@ namespace Logfile;
 
 use Throwable;
 
-class Logfile implements DataInterface
+class Logfile
 {
-    use DataTrait, PathTrait;
-
     protected $token;
 
     protected $sender;
 
-    public function __construct(string $token)
+    protected $config;
+
+    public function __construct(string $token, Config $config = null)
     {
         $this->token = $token;
         $this->sender = new Sender();
+        $this->config = $config ?: new Config();
+    }
+
+    public function setConfig(Config $config): void
+    {
+        $this->config = $config;
+    }
+
+    public function getConfig(): Config
+    {
+        return $this->config;
     }
 
     protected function getToken(): string
@@ -31,8 +42,7 @@ class Logfile implements DataInterface
      */
     public function captureException(Throwable $exception): string
     {
-        $payload = Payload::createFromException($exception, $this->getPath());
-        $payload->copy($this);
+        $payload = Payload::createFromException($exception, $this->getConfig());
         return $this->log($payload);
     }
 
