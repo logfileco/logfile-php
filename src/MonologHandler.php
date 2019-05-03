@@ -19,23 +19,30 @@ class MonologHandler extends AbstractProcessingHandler
 
     protected function getDefaultFormatter(): FormatterInterface
     {
-        return new NormalizerFormatter();
+        return new MonologFormatter();
     }
 
     protected function write(array $record)
     {
         $config = clone $this->logfile->getConfig();
 
-        foreach ($record['formatted']['extra'] as $key => $value) {
+        foreach ($record['context'] as $key => $value) {
+            if ('exception' === $key && $value instanceof \Throwable) {
+                continue;
+            }
             $config->addTag($key, $value);
         }
 
         if (isset($record['context']['exception']) && ($record['context']['exception'] instanceof \Throwable)) {
             $payload = Payload::createFromException($record['context']['exception'], $config);
         } else {
-            $payload = new Payload($record['formatted']['message'], $config);
-            $payload->setContext($record['formatted']['context']);
+            $payload = new Payload($record['message'], $config);
         }
+
+        $payload->setExtra('level', $record['level']);
+        $payload->setExtra('level_name', $record['level_name']);
+        $payload->setExtra('channel', $record['channel']);
+        $payload->setExtra('datetime', $record['datetime']);
 
         $this->logfile->log($payload);
     }

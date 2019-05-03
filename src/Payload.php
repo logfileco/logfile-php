@@ -14,6 +14,8 @@ class Payload
 
     protected $context;
 
+    protected $extra = [];
+
     public function __construct(string $message, Config $config)
     {
         $this->message = $message;
@@ -24,6 +26,11 @@ class Payload
     public function getMessage(): string
     {
         return $this->message;
+    }
+
+    public function setExtra(string $key, $value): void
+    {
+        $this->extra[$key] = $value;
     }
 
     public function setContext(array $context): void
@@ -61,6 +68,11 @@ class Payload
         return $this->id;
     }
 
+    public function setChannel(string $channel): void
+    {
+        $this->channel = $channel;
+    }
+
     /**
      * Get payload data
      *
@@ -68,9 +80,9 @@ class Payload
      */
     public function getData(): array
     {
-        $extra = [
+        $extra = array_merge($this->extra, [
             'id' => $this->getId(),
-        ];
+        ]);
 
         if ($this->config->hasTags()) {
             $extra['tags'] = $this->config->getTags();
