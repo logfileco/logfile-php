@@ -4,34 +4,13 @@ namespace Logfile;
 
 class Config
 {
-    protected $path = '';
+    use PathTrait;
 
     protected $tags = [];
 
     protected $user = [];
 
     protected $release = '';
-
-    public function hasPath(): bool
-    {
-        return !empty($this->path);
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    public function setPath(string $path): void
-    {
-        $realpath = realpath($path);
-
-        if (false === $realpath) {
-            throw new \InvalidArgumentException('Path does not exist: '.$path);
-        }
-
-        $this->path = $realpath . '/';
-    }
 
     public function hasTags(): bool
     {
