@@ -44,7 +44,12 @@ class Sender
 
     public function sendAsync(Payload $payload, string $token)
     {
-        `curl -H 'Content-Type: application/json' -m {$this->timeout} -d '{$payload->getEncodedData()}' {$this->getEndpoint($token)} > /dev/null 2>&1 &`;
+        shell_exec(sprintf('curl -H %s -m %u -d %s %s > /dev/null 2>&1 &',
+            escapeshellarg('Content-Type: application/json'),
+            $this->timeout,
+            escapeshellarg($payload->getEncodedData()),
+            escapeshellarg($this->getEndpoint($token))
+        ));
     }
 
     protected function getEndpoint(string $token): string
