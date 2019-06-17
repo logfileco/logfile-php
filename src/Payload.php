@@ -51,6 +51,7 @@ class Payload
     public static function createFromException(Throwable $exception, Config $config): self
     {
         $payload = new Payload($exception->getMessage(), $config);
+        $payload->setExtra('exception', get_class($exception));
         $trace = new Stacktrace($exception);
         $trace->setPath($config->getPath());
         $context = $trace->getFrames();

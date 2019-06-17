@@ -21,6 +21,18 @@ class Stacktrace
         $this->exception = $exception;
     }
 
+    protected function inTrace(array $frames): bool
+    {
+        foreach ($frames as $frame) {
+            if (array_key_exists($frame, 'file') && $this->exception->getFile() == $frame['file'] &&
+                    array_key_exists($frame, 'line') && $this->exception->getLine() == $frame['line']) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @return array
      */
@@ -28,7 +40,7 @@ class Stacktrace
     {
         $frames = $this->exception->getTrace();
 
-        if (!isset($frames[0]['file']) || $frames[0]['file'] !== $this->exception->getFile()) {
+        if (!$this->inTrace($frames)) {
             array_unshift($frames, [
                 'file' => $this->exception->getFile(),
                 'line' => $this->exception->getLine(),
