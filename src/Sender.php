@@ -4,11 +4,25 @@ namespace Logfile;
 
 class Sender
 {
+    protected $host = 'logfile.co';
+
+    protected $scheme = 'https';
+
     protected $timeout;
 
     public function __construct(int $timeout = 2)
     {
         $this->timeout = $timeout;
+    }
+
+    public function setHost($host): void
+    {
+        $this->host = $host;
+    }
+
+    public function setScheme($scheme): void
+    {
+        $this->scheme = $scheme;
     }
 
     public function send(Payload $payload, string $token): bool
@@ -28,10 +42,20 @@ class Sender
         return $result !== false;
     }
 
+    public function sendAsync(Payload $payload, string $token)
+    {
+        `curl -H 'Content-Type: application/json' -m {$this->timeout} -d '{$payload->getEncodedData()}' {$this->getEndpoint($token)} > /dev/null 2>&1 &`;
+    }
+
+    protected function getEndpoint(string $token): string
+    {
+        return \sprintf('%s://%s/api/push/%s', $this->scheme, $this->host, $token);
+    }
+
     protected function setCurlOptions($handle, Payload $payload, string $token): void
     {
         \curl_setopt_array($handle, [
-            CURLOPT_URL => \sprintf('https://logfile.co/api/push/%s', $token),
+            CURLOPT_URL => $this->getEndpoint($token),
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $payload->getEncodedData(),
             CURLOPT_HTTPHEADER => [

@@ -24,8 +24,8 @@ class Stacktrace
     protected function inTrace(array $frames): bool
     {
         foreach ($frames as $frame) {
-            if (array_key_exists($frame, 'file') && $this->exception->getFile() == $frame['file'] &&
-                    array_key_exists($frame, 'line') && $this->exception->getLine() == $frame['line']) {
+            if (array_key_exists('file', $frame) && $this->exception->getFile() == $frame['file'] &&
+                    array_key_exists('line', $frame) && $this->exception->getLine() == $frame['line']) {
                 return true;
             }
         }

@@ -16,6 +16,8 @@ class Payload
 
     protected $extra = [];
 
+    protected $exceptions = [];
+
     public function __construct(string $message, Config $config)
     {
         $this->message = $message;
@@ -23,9 +25,54 @@ class Payload
         $this->id = $this->uuid4();
     }
 
+    public static function createFromException(Throwable $exception, Config $config): self
+    {
+        $payload = new Payload($exception->getMessage(), $config);
+        $payload->pushException($exception);
+        return $payload;
+    }
+
     public function getMessage(): string
     {
         return $this->message;
+    }
+
+    public function newId(string $id): string
+    {
+        $old = $this->id;
+        $this->id = $id;
+        return $old;
+    }
+
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function hasExceptions(): bool
+    {
+        return count($this->exceptions) > 0;
+    }
+
+    public function pushException(Throwable $exception): void
+    {
+        $trace = new Stacktrace($exception);
+        $trace->setPath($this->config->getPath());
+
+        $this->exceptions[] = [
+            'exception' => \get_class($exception),
+            'message' => $exception->getMessage(),
+            'trace' => $trace->getFrames(),
+        ];
+
+        if ($previousException = $exception->getPrevious()) {
+            $this->pushException($previousException);
+        }
+    }
+
+    public function getExceptions(): array
+    {
+        return $this->exceptions;
     }
 
     public function setExtra(string $key, $value): void
@@ -46,32 +93,6 @@ class Payload
     public function getContext(): array
     {
         return $this->context;
-    }
-
-    public static function createFromException(Throwable $exception, Config $config): self
-    {
-        $payload = new Payload($exception->getMessage(), $config);
-        $payload->setExtra('exception', get_class($exception));
-        $trace = new Stacktrace($exception);
-        $trace->setPath($config->getPath());
-        $context = $trace->getFrames();
-        $payload->setContext($context);
-        return $payload;
-    }
-
-    public function setId(string $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function setChannel(string $channel): void
-    {
-        $this->channel = $channel;
     }
 
     /**
@@ -104,6 +125,10 @@ class Payload
 
         if ($this->hasContext()) {
             $data['context'] = $this->getContext();
+        }
+
+        if ($this->hasExceptions()) {
+            $data['exceptions'] = $this->getExceptions();
         }
 
         return $data;

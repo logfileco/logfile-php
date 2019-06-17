@@ -12,11 +12,23 @@ class Logfile
 
     protected $config;
 
+    protected $async = false;
+
     public function __construct(string $token, Config $config = null)
     {
         $this->token = $token;
         $this->sender = new Sender();
         $this->config = $config ?: new Config();
+    }
+
+    public function sendAsync(bool $async): void
+    {
+        $this->async = $async;
+    }
+
+    public function getSender(): Sender
+    {
+        return $this->sender;
     }
 
     public function setConfig(Config $config): void
@@ -43,6 +55,7 @@ class Logfile
     public function captureException(Throwable $exception): string
     {
         $payload = Payload::createFromException($exception, $this->getConfig());
+
         return $this->log($payload);
     }
 
@@ -54,7 +67,7 @@ class Logfile
      */
     public function log(Payload $payload): string
     {
-        $this->sender->send($payload, $this->getToken());
+        $this->sender->{$this->async ? 'sendAsync' : 'send'}($payload, $this->getToken());
         return $payload->getId();
     }
 }
