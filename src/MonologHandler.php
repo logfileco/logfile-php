@@ -36,10 +36,10 @@ class MonologHandler extends AbstractProcessingHandler
             $config->addTag($key, $value);
         }
 
-        $payload = new Payload($record['message'], $config);
-
         if (isset($record['context']['exception']) && ($record['context']['exception'] instanceof \Throwable)) {
-            $payload->pushException($record['context']['exception']);
+            $payload = Payload::createFromException($record['context']['exception'], $config);
+        } else {
+            $payload = new Payload($record['message'], $config);
         }
 
         $payload->setExtra('level', $record['level']);
