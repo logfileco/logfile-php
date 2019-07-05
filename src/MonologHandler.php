@@ -25,13 +25,6 @@ class MonologHandler extends AbstractProcessingHandler
     {
         $config = clone $this->logfile->getConfig();
 
-        foreach ($record['context'] as $key => $value) {
-            if ('exception' === $key && $value instanceof \Throwable) {
-                continue;
-            }
-            $config->addTag($key, $value);
-        }
-
         foreach ($record['extra'] as $key => $value) {
             $config->addTag($key, $value);
         }
@@ -41,6 +34,8 @@ class MonologHandler extends AbstractProcessingHandler
         } else {
             $payload = new Payload($record['message'], $config);
         }
+
+        $payload->setContext(array_diff_key($record['context'], array_flip(['exception'])));
 
         $payload->setExtra('level', $record['level']);
         $payload->setExtra('level_name', $record['level_name']);

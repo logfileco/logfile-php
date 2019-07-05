@@ -2,9 +2,10 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-$logfile = new Logfile\Logfile('5d428582-7733-151c-4eaf-d23d0ebdca3b    ');
-$logfile->getSender()->setHost('localhost:3030');
+$logfile = new Logfile\Logfile('5d428582-7733-151c-4eaf-d23d0ebdca3b');
+$logfile->getSender()->setHost('localhost:8077');
 $logfile->getSender()->setScheme('http');
+$logfile->sendAsync(true);
 $logfile->getConfig()->setUser(['id' => '4']);
 $logfile->getConfig()->setTags([
     'php_version' => phpversion(),
@@ -28,7 +29,7 @@ set_exception_handler(function (Throwable $e) use($logfile, $logger) {
 });
 
 function fail($how) {
-    throw new ErrorException('whoops');
+    throw new ErrorException('whoops '.$how);
 }
 
 try {
