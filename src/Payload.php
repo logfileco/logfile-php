@@ -12,10 +12,6 @@ class Payload
 
     protected $id;
 
-    protected $context;
-
-    protected $extra = [];
-
     protected $exceptions = [];
 
     public function __construct(string $message, Config $config)
@@ -49,11 +45,6 @@ class Payload
         return $this->id;
     }
 
-    public function hasExceptions(): bool
-    {
-        return count($this->exceptions) > 0;
-    }
-
     public function pushException(Throwable $exception): void
     {
         $trace = new Stacktrace($exception);
@@ -75,26 +66,6 @@ class Payload
         return $this->exceptions;
     }
 
-    public function setExtra(string $key, $value): void
-    {
-        $this->extra[$key] = $value;
-    }
-
-    public function setContext(array $context): void
-    {
-        $this->context = $context;
-    }
-
-    public function hasContext(): bool
-    {
-        return !empty($this->context);
-    }
-
-    public function getContext(): array
-    {
-        return $this->context;
-    }
-
     /**
      * Get payload data
      *
@@ -102,36 +73,12 @@ class Payload
      */
     public function getData(): array
     {
-        $extra = array_merge($this->extra, [
+        return [
             'id' => $this->getId(),
-        ]);
-
-        if ($this->config->hasTags()) {
-            $extra['tags'] = $this->config->getTags();
-        }
-
-        if ($this->config->hasUser()) {
-            $extra['user'] = $this->config->getUser();
-        }
-
-        if ($this->config->hasRelease()) {
-            $extra['release'] = $this->config->getRelease();
-        }
-
-        $data = [
             'message' => $this->getMessage(),
-            'extra' => $extra,
+            'tags' => $this->config->getTags(),
+            'exceptions' => $this->getExceptions(),
         ];
-
-        if ($this->hasContext()) {
-            $data['context'] = $this->getContext();
-        }
-
-        if ($this->hasExceptions()) {
-            $data['exceptions'] = $this->getExceptions();
-        }
-
-        return $data;
     }
 
     /**

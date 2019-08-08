@@ -2,13 +2,14 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-$logfile = new Logfile\Logfile('5d428582-7733-151c-4eaf-d23d0ebdca3b');
+$logfile = new Logfile\Logfile('edebc96b-85df-cf14-1487-72fb8ee7a171');
 $logfile->getSender()->setHost('localhost:8077');
 $logfile->getSender()->setScheme('http');
 $logfile->sendAsync(true);
 $logfile->getConfig()->setUser(['id' => '4']);
 $logfile->getConfig()->setTags([
     'php_version' => phpversion(),
+    'user' => ['id' => 1234, 'username' => 'bob'],
 ]);
 $logfile->getConfig()->setRelease(exec('git log --pretty="%H" -n1 HEAD'));
 

@@ -8,10 +8,6 @@ class Config
 
     protected $tags = [];
 
-    protected $user = [];
-
-    protected $release = '';
-
     public function hasTags(): bool
     {
         return !empty($this->tags);
@@ -34,31 +30,31 @@ class Config
 
     public function hasUser(): bool
     {
-        return !empty($this->user);
+        return !empty($this->tags['user']);
     }
 
     public function getUser(): array
     {
-        return $this->user;
+        return $this->tags['user'] ?? [];
     }
 
     public function setUser(array $user): void
     {
-        $this->user = $user;
+        $this->tags['user'] = $user;
     }
 
     public function hasRelease(): bool
     {
-        return !empty($this->release);
+        return !empty($this->tags['release']);
     }
 
     public function getRelease(): string
     {
-        return $this->release;
+        return $this->tags['release'] ?? '';
     }
 
     public function setRelease(string $release)
     {
-        $this->release = $release;
+        $this->tags['release'] = $release;
     }
 }

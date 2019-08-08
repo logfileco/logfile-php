@@ -25,7 +25,13 @@ class MonologHandler extends AbstractProcessingHandler
     {
         $config = clone $this->logfile->getConfig();
 
-        foreach ($record['extra'] as $key => $value) {
+        $context = array_merge(
+            array_diff_key($record['context'], array_flip(['exception'])),
+            $record['extra'],
+            array_intersect_key($record, array_flip(['level', 'level_name', 'channel', 'datetime']))
+        );
+
+        foreach ($context as $key => $value) {
             $config->addTag($key, $value);
         }
 
@@ -34,13 +40,6 @@ class MonologHandler extends AbstractProcessingHandler
         } else {
             $payload = new Payload($record['message'], $config);
         }
-
-        $payload->setContext(array_diff_key($record['context'], array_flip(['exception'])));
-
-        $payload->setExtra('level', $record['level']);
-        $payload->setExtra('level_name', $record['level_name']);
-        $payload->setExtra('channel', $record['channel']);
-        $payload->setExtra('datetime', $record['datetime']);
 
         $this->logfile->log($payload);
     }
