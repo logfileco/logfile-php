@@ -1,12 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Logfile;
+namespace Logfile\Inspection;
 
+use Logfile\Traits;
 use Throwable;
 
 class Stacktrace
 {
-    use PathTrait;
+    use Traits\Path;
 
     /**
      * @var Throwable

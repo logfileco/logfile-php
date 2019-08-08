@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Logfile;
+namespace Logfile\Traits;
 
-trait PathTrait
+trait Path
 {
     protected $path = '';
 

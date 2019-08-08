@@ -1,14 +1,26 @@
 <?php declare(strict_types=1);
 
-namespace Logfile;
+namespace Logfile\Monolog;
 
-use Monolog\Logger;
+use Logfile\Logfile;
+use Logfile\Payload;
 use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Formatter\FormatterInterface;
+use Monolog\Logger;
 
-class MonologHandler extends AbstractProcessingHandler
+class LogfileHandler extends AbstractProcessingHandler
 {
     protected $logfile;
+
+    protected $levelMap = array(
+        Logger::DEBUG     => 'debug',
+        Logger::INFO      => 'info',
+        Logger::NOTICE    => 'info',
+        Logger::WARNING   => 'warning',
+        Logger::ERROR     => 'error',
+        Logger::CRITICAL  => 'critical',
+        Logger::ALERT     => 'critical',
+        Logger::EMERGENCY => 'critical',
+    );
 
     public function __construct(Logfile $logfile, int $level = Logger::DEBUG, bool $bubble = true)
     {
@@ -16,20 +28,15 @@ class MonologHandler extends AbstractProcessingHandler
         parent::__construct($level, $bubble);
     }
 
-    protected function getDefaultFormatter(): FormatterInterface
-    {
-        return new MonologFormatter();
-    }
-
     protected function write(array $record)
     {
         $config = clone $this->logfile->getConfig();
 
-        $context = array_merge(
+        $context = array_filter(array_merge(
             array_diff_key($record['context'], array_flip(['exception'])),
             $record['extra'],
-            array_intersect_key($record, array_flip(['level', 'level_name', 'channel', 'datetime']))
-        );
+            array_diff_key($record, array_flip(['context', 'extra', 'message', 'level', 'level_name', 'formatted', 'datetime']))
+        ));
 
         foreach ($context as $key => $value) {
             $config->addTag($key, $value);
@@ -39,6 +46,14 @@ class MonologHandler extends AbstractProcessingHandler
             $payload = Payload::createFromException($record['context']['exception'], $config);
         } else {
             $payload = new Payload($record['message'], $config);
+        }
+
+        if (isset($record['datetime'])) {
+            $payload->setDateTime($record['datetime']);
+        }
+
+        if (isset($record['level'])) {
+            $payload->setSeverity($this->levelMap[$record['level']]);
         }
 
         $this->logfile->log($payload);

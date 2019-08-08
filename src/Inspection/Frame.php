@@ -1,10 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Logfile;
+namespace Logfile\Inspection;
+
+use Logfile\Traits;
 
 class Frame
 {
-    use PathTrait;
+    use Traits\Path;
 
     protected $file;
 

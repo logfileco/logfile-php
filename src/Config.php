@@ -4,7 +4,7 @@ namespace Logfile;
 
 class Config
 {
-    use PathTrait;
+    use Traits\Path;
 
     protected $tags = [];
 

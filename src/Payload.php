@@ -2,6 +2,8 @@
 
 namespace Logfile;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Throwable;
 
 class Payload
@@ -12,6 +14,10 @@ class Payload
 
     protected $id;
 
+    protected $dateTime;
+
+    protected $severity;
+
     protected $exceptions = [];
 
     public function __construct(string $message, Config $config)
@@ -19,11 +25,13 @@ class Payload
         $this->message = $message;
         $this->config = $config;
         $this->id = $this->uuid4();
+        $this->dateTime = new DateTimeImmutable;
+        $this->severity = 'debug';
     }
 
     public static function createFromException(Throwable $exception, Config $config): self
     {
-        $payload = new Payload($exception->getMessage(), $config);
+        $payload = new self($exception->getMessage(), $config);
         $payload->pushException($exception);
         return $payload;
     }
@@ -45,9 +53,29 @@ class Payload
         return $this->id;
     }
 
+    public function setDateTime(DateTimeInterface $dateTime): void
+    {
+        $this->dateTime = $dateTime;
+    }
+
+    public function getDateTime(): DateTimeInterface
+    {
+        return $this->dateTime;
+    }
+
+    public function setSeverity(string $severity): void
+    {
+        $this->severity = $severity;
+    }
+
+    public function getSeverity(): string
+    {
+        return $this->severity;
+    }
+
     public function pushException(Throwable $exception): void
     {
-        $trace = new Stacktrace($exception);
+        $trace = new Inspection\Stacktrace($exception);
         $trace->setPath($this->config->getPath());
 
         $this->exceptions[] = [
@@ -75,6 +103,8 @@ class Payload
     {
         return [
             'id' => $this->getId(),
+            'severity' => $this-> getSeverity(),
+            'datetime' => $this->getDateTime(),
             'message' => $this->getMessage(),
             'tags' => $this->config->getTags(),
             'exceptions' => $this->getExceptions(),
@@ -89,20 +119,20 @@ class Payload
     public function getEncodedData(): string
     {
         $data = $this->getData();
-        $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $encoded = \json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        if (JSON_ERROR_UTF8 === json_last_error()) {
-            if (is_string($data)) {
+        if (JSON_ERROR_UTF8 === \json_last_error()) {
+            if (\is_string($data)) {
                 $this->detectAndCleanUtf8($data);
-            } elseif (is_array($data)) {
-                array_walk_recursive($data, array($this, 'detectAndCleanUtf8'));
+            } elseif (\is_array($data)) {
+                \array_walk_recursive($data, [$this, 'detectAndCleanUtf8']);
             }
-            $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $encoded = \json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
 
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            $error = json_last_error_msg();
-            throw new \LogicException(sprintf('Failed to encode json data: %s.', $error));
+        if (JSON_ERROR_NONE !== \json_last_error()) {
+            $error = \json_last_error_msg();
+            throw new \LogicException(\sprintf('Failed to encode json data: %s.', $error));
         }
 
         return $encoded;
@@ -114,17 +144,17 @@ class Payload
      */
     public function detectAndCleanUtf8(&$data)
     {
-        if (is_string($data) && !preg_match('//u', $data)) {
-            $data = preg_replace_callback(
+        if (\is_string($data) && !\preg_match('//u', $data)) {
+            $data = \preg_replace_callback(
                 '/[\x80-\xFF]+/',
                 function ($m) {
-                    return utf8_encode($m[0]);
+                    return \utf8_encode($m[0]);
                 },
                 $data
             );
-            $data = str_replace(
-                array('¤', '¦', '¨', '´', '¸', '¼', '½', '¾'),
-                array('€', 'Š', 'š', 'Ž', 'ž', 'Œ', 'œ', 'Ÿ'),
+            $data = \str_replace(
+                ['¤', '¦', '¨', '´', '¸', '¼', '½', '¾'],
+                ['€', 'Š', 'š', 'Ž', 'ž', 'Œ', 'œ', 'Ÿ'],
                 $data
             );
         }
@@ -138,25 +168,25 @@ class Payload
      */
     protected function uuid4(): string
     {
-        mt_srand();
-        return sprintf(
+        \mt_srand();
+        return \sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             // 16 bits for "time_mid"
-            mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
             // 16 bits for "time_hi_and_version",
             // four most significant bits holds version number 4
-            mt_rand(0, 0x0fff) | 0x4000,
+            \mt_rand(0, 0x0fff) | 0x4000,
             // 16 bits, 8 bits for "clk_seq_hi_res",
             // 8 bits for "clk_seq_low",
             // two most significant bits holds zero and one for variant DCE1.1
-            mt_rand(0, 0x3fff) | 0x8000,
+            \mt_rand(0, 0x3fff) | 0x8000,
             // 48 bits for "node"
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff),
-            mt_rand(0, 0xffff)
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff),
+            \mt_rand(0, 0xffff)
         );
     }
 }

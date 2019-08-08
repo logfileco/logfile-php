@@ -44,7 +44,8 @@ class Sender
 
     public function sendAsync(Payload $payload, string $token)
     {
-        shell_exec(sprintf('curl -H %s -m %u -d %s %s > /dev/null 2>&1 &',
+        shell_exec(sprintf(
+            'curl -H %s -m %u -d %s %s > /dev/null 2>&1 &',
             escapeshellarg('Content-Type: application/json'),
             $this->timeout,
             escapeshellarg($payload->getEncodedData()),
