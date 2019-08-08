@@ -8,7 +8,7 @@ class FrameTest extends TestCase
 {
     public function testFilename()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setFile(__FILE__);
         $this->assertEquals(__FILE__, $frame->getFile());
@@ -18,7 +18,7 @@ class FrameTest extends TestCase
 
     public function testPathAndRelativeFilepath()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setFile(__FILE__);
         $frame->setPath(__DIR__.'/../tests');
@@ -29,7 +29,7 @@ class FrameTest extends TestCase
 
     public function testLineNumber()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setLine(1);
         $this->assertEquals(1, $frame->getLine());
@@ -38,7 +38,7 @@ class FrameTest extends TestCase
 
     public function testCaller()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setCaller('foo');
         $this->assertEquals('foo', $frame->getCaller());
@@ -47,7 +47,7 @@ class FrameTest extends TestCase
 
     public function testArguments()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setArguments(['foo']);
         $this->assertEquals(['param1'=> 'foo'], $frame->getArguments());
@@ -55,7 +55,7 @@ class FrameTest extends TestCase
 
     public function testManyArguments()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setArguments([range(1, 101)]);
         $this->assertEquals(['param1'=> 'Array of length 101'], $frame->getArguments());
@@ -63,7 +63,7 @@ class FrameTest extends TestCase
 
     public function testArgumentsTypes()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
 
         $frame->setArguments([['foo', 'bar']]);
         $this->assertEquals(['param1'=> 'Array<string> of length 2'], $frame->getArguments());
@@ -101,16 +101,16 @@ class FrameTest extends TestCase
 
     public function testContext()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
         $frame->setFile(__FILE__);
         $frame->setLine(1);
         $this->assertTrue($frame->hasContext());
-        $this->assertTrue($frame->getContext() instanceof \Logfile\Context);
+        $this->assertTrue($frame->getContext() instanceof \Logfile\Inspection\Context);
     }
 
     public function testArray()
     {
-        $frame = new \Logfile\Frame;
+        $frame = new \Logfile\Inspection\Frame;
         $frame->setFile(__FILE__);
         $frame->setLine(1);
         $frame->setCaller('foo');
@@ -119,21 +119,21 @@ class FrameTest extends TestCase
 
     public function testCreate()
     {
-        $frame = \Logfile\Frame::create([
+        $frame = \Logfile\Inspection\Frame::create([
             'file' => __FILE__,
             'line' => 1,
             'class' => 'stdClass',
             'type' => '->',
             'function' => '__construct'
         ]);
-        $this->assertTrue($frame instanceof \Logfile\Frame);
+        $this->assertTrue($frame instanceof \Logfile\Inspection\Frame);
 
-        $frame = \Logfile\Frame::create([
+        $frame = \Logfile\Inspection\Frame::create([
             'file' => __FILE__,
             'line' => 1,
             'function' => 'isset',
             'args' => [true],
         ]);
-        $this->assertTrue($frame instanceof \Logfile\Frame);
+        $this->assertTrue($frame instanceof \Logfile\Inspection\Frame);
     }
 }

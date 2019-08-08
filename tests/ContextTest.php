@@ -30,19 +30,19 @@ class ContextTest extends TestCase
 
     public function testContextTop()
     {
-        $context = new \Logfile\Context($this->file, 1);
+        $context = new \Logfile\Inspection\Context($this->file, 1);
         $this->assertCount(5, $context->getPlaceInFile());
     }
 
     public function testContextMiddle()
     {
-        $context = new \Logfile\Context($this->file, 10);
+        $context = new \Logfile\Inspection\Context($this->file, 10);
         $this->assertCount(9, $context->getPlaceInFile());
     }
 
     public function testContextBottom()
     {
-        $context = new \Logfile\Context($this->file, 40);
+        $context = new \Logfile\Inspection\Context($this->file, 40);
         $this->assertCount(5, $context->getPlaceInFile());
     }
 }
